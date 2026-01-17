@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Iris Predictor</title>
+    <style>
+        /* This section adds the colors and styling */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #c6eef7ff; /* Light grey-blue background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white; /* White box for inputs */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        input { 
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box; /* Ensures padding doesn't break width */
+        }
+        button { 
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50; /* Green button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #45a049; }
+        #result { 
+            margin-top: 25px; 
+            font-size: 20px; 
+            font-weight: bold; 
+            color: #2c3e50; 
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Iris Classifier</h1>
+        <p>Enter measurements (cm)</p>
+        
+        <input type="number" step="0.1" id="sl" placeholder="Sepal Length">
+        <input type="number" step="0.1" id="sw" placeholder="Sepal Width">
+        <input type="number" step="0.1" id="pl" placeholder="Petal Length">
+        <input type="number" id="pw" step="0.1" placeholder="Petal Width">
+        
+        <button onclick="getPrediction()">Predict Species</button>
+        
+        <div id="result">Wait for results....</div>
+    </div>
+
+    <script>
+        async function getPrediction() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText = "Processing...";
+
+            const data = {
+                sepal_length: parseFloat(document.getElementById('sl').value),
+                sepal_width: parseFloat(document.getElementById('sw').value),
+                petal_length: parseFloat(document.getElementById('pl').value),
+                petal_width: parseFloat(document.getElementById('pw').value)
+            };
+
+            // Basic check to ensure no empty inputs
+            if (Object.values(data).some(isNaN)) {
+                resultDiv.innerText = "Please fill all fields!";
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                resultDiv.innerText = "Species: " + result.species.toUpperCase();
+                resultDiv.style.color = "#0a6b32ff"; // Change text to green on success
+            } catch (error) {
+                resultDiv.innerText = "Error connecting to server";
+                resultDiv.style.color = "#e74c3c"; // Change text to red on error
+            }
+        }
+    </script>
+</body>
+</html>
